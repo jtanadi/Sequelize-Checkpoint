@@ -19,61 +19,53 @@ const Task = db.define('Task', {
     type: Sequelize.BOOLEAN,
     defaultValue: false
   },
-  due: Sequelize.DATE
+  due: Sequelize.DATE,
+  timeRemaining: {
+    type: Sequelize.VIRTUAL,
+    get() {
+      const dueDate = this.due
+      return (!dueDate) ? Infinity : dueDate - Date.now()
+    }
+  }
 });
 
-Task.clearCompleted = async function() {
-  await this.destroy({ where: { complete: true } })
+Task.belongsTo(Task, {as: 'parent'});
+
+Task.clearCompleted = function() {
+  return this.destroy({ where: { complete: true } })
 }
 
-Task.completeAll = async function() {
-  await this.update(
+Task.completeAll = function() {
+  return this.update(
     { complete: true },
     { where: { complete: false },
   })
 }
 
 Task.prototype.getTimeRemaining = function() {
-  const dueDate = this.get().due
-  return (!dueDate) ? Infinity : dueDate - Date.now()
+  return !this.due ? Infinity : this.due - Date.now()
 }
 
 Task.prototype.isOverdue = function() {
-  const dueDate = this.get().due
-  const completed = this.get().complete
-  const now = Date.now()
-
-  return (!completed && now > dueDate)
+  return !this.complete && this.getTimeRemaining() < 0
 }
 
-Task.prototype.addChild = async function(child) {
-  const newChild = await Task.create({ name: child.name, parentId: this.id})
-  let children = this.getDataValue("children")
-
-  if (!children) {
-    children = [];
-  }
-
-  children.push(newChild)
-  this.setDataValue("children", children)
-
-  return newChild
+Task.prototype.addChild = function(child) {
+  return Task.create({ ...child, parentId: this.id })
 }
 
 Task.prototype.getChildren = function() {
-  return this.get().children
+  return Task.findAll({ where: { parentId: this.id } })
 }
 
-Task.prototype.getSiblings = async function() {
-  const parentId = this.get().parentId
-  const siblings = await Task.findAll({ where: { parentId } })
-  return siblings.filter(child => child.id !== this.id)
+Task.prototype.getSiblings = function() {
+  return Task.findAll({
+    where: {
+      parentId: this.parentId,
+      id: { $ne: this.id }
+    }
+  })
 }
-
-
-
-Task.belongsTo(Task, {as: 'parent'});
-
 
 //---------^^^---------  your code above  ---------^^^----------
 
