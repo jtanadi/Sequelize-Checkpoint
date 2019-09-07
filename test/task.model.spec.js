@@ -38,7 +38,7 @@ describe('Task', function () {
     });
 
     describe('clearCompleted', function () {
-      xit('removes all completed tasks from the database', async function () {
+      it('removes all completed tasks from the database', async function () {
         await Task.clearCompleted();
 
         const completedTasks = await Task.findAll({ where: { complete: true } });
@@ -51,7 +51,7 @@ describe('Task', function () {
 
     describe('completeAll', function () {
 
-      xit('marks all incomplete tasks as completed', async function () {
+      it('marks all incomplete tasks as completed', async function () {
         await Task.completeAll();
 
         const completedTasks = await Task.findAll({ where: { complete: true } });
@@ -69,12 +69,12 @@ describe('Task', function () {
 
     describe('getTimeRemaining', function () {
 
-      xit('returns the Infinity value if task has no due date', function () {
+      it('returns the Infinity value if task has no due date', function () {
         const task = Task.build();
         expect(task.getTimeRemaining()).to.equal(Infinity);
       });
 
-      xit('returns the difference between due date and now', function () {
+      it('returns the difference between due date and now', function () {
         const oneDay = 24 * 60 * 60 * 1000; // one day in milliseconds
 
         // create a task due one day from this point in time
@@ -89,14 +89,14 @@ describe('Task', function () {
 
     describe('isOverdue', function () {
 
-      xit('is overdue if the due date is in the past', function () {
+      it('is overdue if the due date is in the past', function () {
         const task = Task.build({
           due: helper.dates.yesterday()
         });
         expect(task.isOverdue()).to.be.true;
       });
 
-      xit('is not overdue if the due date is in the past but complete is true', function () {
+      it('is not overdue if the due date is in the past but complete is true', function () {
         const task = Task.build({
           due: helper.dates.yesterday(),
           complete: true
@@ -104,7 +104,7 @@ describe('Task', function () {
         expect(task.isOverdue()).to.be.false;
       });
 
-      xit('is not overdue if the due date is in the future', function () {
+      it('is not overdue if the due date is in the future', function () {
         const task = Task.build({
           due: helper.dates.tomorrow()
         });
@@ -114,7 +114,7 @@ describe('Task', function () {
 
     describe('addChild', function () {
 
-      xit('should return a promise for the new child', async function () {
+      it('should return a promise for the new child', async function () {
         const parentTask = await Task.create({ name: 'parent task' });
         const childTask = await parentTask.addChild({ name: 'child task' });
         expect(childTask.name).to.equal('child task');
@@ -125,7 +125,7 @@ describe('Task', function () {
 
     describe('getChildren', function () {
 
-      xit('should return a promise for an array of the task\'s children', async function () {
+      it('should return a promise for an array of the task\'s children', async function () {
         const parentTask = await Task.create({ name: 'parent task' });
         await parentTask.addChild({ name: 'child task' });
         await parentTask.addChild({ name: 'child task 2' });
@@ -140,7 +140,7 @@ describe('Task', function () {
 
     describe('getSiblings', function () {
 
-      xit('returns a promise for an array of siblings', async function () {
+      it('returns a promise for an array of siblings', async function () {
         const parentTask = await Task.create({ name: 'parent task' });
         const firstChild = await parentTask.addChild({ name: 'first child' });
         const secondChild = await parentTask.addChild({ name: 'second child' });
